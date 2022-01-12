@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% block content %}
+  <div id='chart' class='chart'”></div>
+  <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Esse repellat voluptate ipsa iste accusamus eos ea ut maxime, inventore rerum. Odio voluptate aliquid dolorum dignissimos eligendi, minus distinctio corrupti molestias.</p>
+  <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+  <script>
+    var graphs = {{graph1JSON | safe}};
+    Plotly.plot('chart',graphs,{});
+  </script>
+
+{% endblock %}
