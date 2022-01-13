@@ -1,5 +1,14 @@
 {% extends "layout.html" %}
 {% block content %}
+
+  <div class="input-group rounded">
+    <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search"
+    aria-describedby="search-addon" />
+    <span class="input-group-text border-0" id="search-addon">
+      <i class="fas fa-search"></i>
+    </span>
+  </div>
+
   <div id='chart' class='chart'”></div>
   <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Esse repellat voluptate ipsa iste accusamus eos ea ut maxime, inventore rerum. Odio voluptate aliquid dolorum dignissimos eligendi, minus distinctio corrupti molestias.</p>
   <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
