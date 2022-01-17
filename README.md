@@ -1,2 +1,2 @@
 # AirbnbAnalyzer
-Helps travelers find a good deal
+example.txt is derived from 'python3 scrapeInfor.py > exmaple.txt'
