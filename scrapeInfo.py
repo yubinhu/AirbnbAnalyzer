@@ -10,9 +10,19 @@ from datetime import datetime
 class PlaceToLive:
 
     def __init__(self, url):
+        self.url = url
+        self.HTML = None
+        self.html = None
+        self.price = None
+        self.rate = None
+        self.num_reviews = None
+        self.checkin_unavailable_dates = None
+        self.checkin_available_dates = None
+    
+    def get_html(self):
         try:
             r = session.get(url)
-            r.html.render(sleep=1, keep_page=True, scrolldown=1)
+            r.html.render(sleep=1, keep_page=True, scrolldown=10)
             H = r.html
             h = r.html.html
         except:
@@ -22,20 +32,15 @@ class PlaceToLive:
         self.html = h
 
     def get_price(self):
-        if not self.html:
-            result = re.findall(r'>\$(\d+)</span><', self.html)
-            self.price = (int(result[0])) if result else None
-        else:
-            self.price = None
+        if self.html is not None:
+            result = re.search(r'>\$(\d+)</span><', self.html).group(1)
+            self.price = (int(result)) if result else None
     
     def get_review(self):
-        if not self.html:
-            result = re.findall(r'Rated (\d\.\d+) out of 5 from (\d+) reviews.')
-            self.rate = result[0]
-            self.num_reviews = result[1]
-        else:
-            self.rate = None
-            self.num_reviews = None
+        if self.html is not None:
+            result = re.search(r'Rated (\d\.\d+) out of 5 from (\d+) reviews.', self.html)
+            self.rate = result.group(1)
+            self.num_reviews = result.group(2)
 
     def get_dates(self):
         # get object specifying dates that are available
@@ -45,11 +50,10 @@ class PlaceToLive:
         # reformat dates to "January 8, 2022" like format        
         reformated_available_dates = [datetime.strftime(datetime.strptime(d, '%m/%d/%Y'), '%B %d, %Y').replace(' 0', ' ') for d in available_dates]
         # find the objects that specify whether these dates are unavailable, available for check out only, or available for check in
-        classes = [r.html.find('[aria-label*="'+d+'"]',first=True) for d in reformated_available_dates]
+        classes = [self.HTML.find('[aria-label*="'+d+'"]',first=True) for d in reformated_available_dates]
         checkin_available_dates = []
         checkin_unavailable_dates = []
         for i in range(len(available_dates)):
-            print(i, classes[i])
             if classes[i].find('[aria-label*="check out"]'):
                 checkin_unavailable_dates.append(available_dates[i])
             else:
@@ -57,56 +61,42 @@ class PlaceToLive:
         self.checkin_unavailable_dates = checkin_unavailable_dates
         self.checkin_available_dates = checkin_available_dates
 
+    def getAllInfo(self):
+
+        if self.HTML is None or self.html is None:
+            self.get_html()
+
+        if self.price is None:
+            self.get_price()
+
+        if self.rate is None or self.num_reviews is None:
+            self.get_review()
+        
+        if self.checkin_available_dates is None or self.checkin_unavailable_dates is None:
+            self.get_dates()
+        
+    def printAllInfo(self):
+
+        print('Price Per Night: $', self.price)
+        print('Rated {rate} out of 5 by {num_reviews} reviews'.format(rate = self.rate, num_reviews = self.num_reviews))
+        print('These upcoming dates are available for check-in:\n', self.checkin_available_dates)
+        print('These upcoming dates are only available for check out:\n', self.checkin_unavailable_dates)
+
+start = time.time()
+
 session = HTMLSession()
 
 url = 'https://www.airbnb.com/rooms/52553164'
 
-'''
-p = PlaceToLive(url)
+currAirBnB = PlaceToLive(url)
+currAirBnB.getAllInfo()
+currAirBnB.printAllInfo()
 
-h = None
+end = time.time()          
+print('Time Elapsed: ', round(end-start, 3), 's')
 
-def get_price():
-    r = session.get(url)
-    r.html.render(sleep=1, keep_page=True, scrolldown=1)
-    global h
-    h = r.html.html
-    result = re.findall(r'>\$(\d+)</span><', h)
-    price = (int(result[0])) if result else None
-    return price
 
-price = None
-ctr = 0
-while not price and ctr<10:
-    price = get_price()
-    ctr += 1
-    time.sleep(random.randint(1,5))
 
-print(price, ctr)
-print(h)
-'''
 
-r = session.get(url)
-r.html.render(sleep=1, keep_page=True, scrolldown=10)
-h = r.html.html
-available_dates_classes = r.html.find('[data-is-day-blocked=false]')
-available_dates = [d.search('data-testid=\"calendar-day-{}"')[0] for d in available_dates_classes]
-print(available_dates)
-reformated_available_dates = [datetime.strftime(datetime.strptime(d, '%m/%d/%Y'), '%B %d, %Y').replace(' 0', ' ') for d in available_dates]
-print(reformated_available_dates)
-print(['[aria-label*="'+d+'"]' for d in reformated_available_dates])
-classes = [r.html.find('[aria-label*="'+d+'"]',first=True) for d in reformated_available_dates]
-print(classes)
-checkin_available_dates = []
-checkin_unavailable_dates = []
-for i in range(len(available_dates)):
-    print(i, classes[i])
-    if classes[i].find('[aria-label*="check out"]'):
-        checkin_unavailable_dates.append(available_dates[i])
-    else:
-        checkin_available_dates.append(available_dates[i])
-
-print(checkin_available_dates)
-print(checkin_unavailable_dates)
 
 
