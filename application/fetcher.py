@@ -9,7 +9,7 @@ from datetime import datetime
 
 class PlaceToLive:
 
-    def __init__(self, url):
+    def __init__(self, url, session):
         self.url = url
         self.HTML = None
         self.html = None
@@ -18,10 +18,11 @@ class PlaceToLive:
         self.num_reviews = None
         self.checkin_unavailable_dates = None
         self.checkin_available_dates = None
+        self.session = session
     
     def get_html(self):
         try:
-            r = session.get(url)
+            r = self.session.get(url)
             r.html.render(sleep=1, keep_page=True, scrolldown=10)
             H = r.html
             h = r.html.html
@@ -82,18 +83,19 @@ class PlaceToLive:
         print('These upcoming dates are available for check-in:\n', self.checkin_available_dates)
         print('These upcoming dates are only available for check out:\n', self.checkin_unavailable_dates)
 
-start = time.time()
+if __name__ == "__main__":
+    start = time.time()
 
-session = HTMLSession()
+    session = HTMLSession()
 
-url = 'https://www.airbnb.com/rooms/52553164'
+    url = 'https://www.airbnb.com/rooms/52553164'
 
-currAirBnB = PlaceToLive(url)
-currAirBnB.getAllInfo()
-currAirBnB.printAllInfo()
+    currAirBnB = PlaceToLive(url, session)
+    currAirBnB.getAllInfo()
+    currAirBnB.printAllInfo()
 
-end = time.time()          
-print('Time Elapsed: ', round(end-start, 3), 's')
+    end = time.time()          
+    print('Time Elapsed: ', round(end-start, 3), 's')
 
 
 
